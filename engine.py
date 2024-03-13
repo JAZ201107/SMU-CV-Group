@@ -42,6 +42,10 @@ def evaluate(model: nn.Module, loss_fn, dataloader, metrics, params):
             summary_batch["loss"] = loss.item()
             summ.append(summary_batch)
 
+            del data_batch
+            del labels_batch
+            del output_batch
+
             t.set_postfix(
                 loss="{:05.3f}".format(loss_avg()),
                 roc_auc="{:05.3f}".format(summary_batch["roc_auc"]),
@@ -101,6 +105,9 @@ def train_one_epoch(
             summ.append(summary_batch)
 
             loss_avg.update(loss.item())
+            del data_batch
+            del labels_batch
+            del output_batch
 
             t.set_postfix(
                 loss="{:05.3f}".format(loss_avg()),
