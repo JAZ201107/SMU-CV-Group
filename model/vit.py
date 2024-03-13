@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models import ViT_B_16_Weights, vit_b_16
@@ -22,4 +23,4 @@ class vit(nn.Module):
     def forward(self, x):
         x = self.model(x)
 
-        return F.sigmoid(x)  # make range (0, 1)
+        return torch.sigmoid(x)  # make range (0, 1)
