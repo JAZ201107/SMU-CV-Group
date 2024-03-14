@@ -1,3 +1,7 @@
 IMAGE_SIZE = 224
 THRESHOLD = 0.5
 SAVE_SUMMARY_STEPS = 5
+
+
+DETECT_OUTPUT = "object_est.txt"
+CLASSIFIER_OUTPUT = "id_est.txt"

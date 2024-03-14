@@ -5,7 +5,7 @@ from torchvision.models import ViT_B_16_Weights, vit_b_16
 
 
 class vit(nn.Module):
-    def __init__(self, params):
+    def __init__(self):
         super().__init__()
         model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_V1)
         in_feature = model.heads.head.in_features

@@ -121,45 +121,53 @@ from utils.data import resize_and_save
 #     process_images("data/p_images")
 
 
-def split_dataset():
-    source_dir_0 = "./data/train_images/0"
-    source_dir_1 = "./data/train_images/1"
-    test_dir = "./data/test_images"
-    test_ratio = 0.2
+# def split_dataset():
+#     source_dir_0 = "./data/train_images/0"
+#     source_dir_1 = "./data/train_images/1"
+#     test_dir = "./data/test_images"
+#     test_ratio = 0.2
 
-    # Create test directories
-    os.makedirs(os.path.join(test_dir, "0"), exist_ok=True)
-    os.makedirs(os.path.join(test_dir, "1"), exist_ok=True)
+#     # Create test directories
+#     os.makedirs(os.path.join(test_dir, "0"), exist_ok=True)
+#     os.makedirs(os.path.join(test_dir, "1"), exist_ok=True)
 
-    def move_images(source, dest, ratio):
-        files = [
-            f for f in os.listdir(source) if os.path.isfile(os.path.join(source, f))
-        ]
+#     def move_images(source, dest, ratio):
+#         files = [
+#             f for f in os.listdir(source) if os.path.isfile(os.path.join(source, f))
+#         ]
 
-        # Calculate the number of files to move
-        n_test_files = int(len(files) * ratio)
+#         # Calculate the number of files to move
+#         n_test_files = int(len(files) * ratio)
 
-        # Randomly select files to move
-        test_files = sample(files, n_test_files)
+#         # Randomly select files to move
+#         test_files = sample(files, n_test_files)
 
-        # Move the files
-        for f in test_files:
-            shutil.move(os.path.join(source, f), os.path.join(dest, f))
+#         # Move the files
+#         for f in test_files:
+#             shutil.move(os.path.join(source, f), os.path.join(dest, f))
 
-    move_images(source_dir_0, os.path.join(test_dir, "0"), test_ratio)
-    move_images(source_dir_1, os.path.join(test_dir, "1"), test_ratio)
+#     move_images(source_dir_0, os.path.join(test_dir, "0"), test_ratio)
+#     move_images(source_dir_1, os.path.join(test_dir, "1"), test_ratio)
 
 
 if __name__ == "__main__":
-    # data_directory = "./data/p_images"
-    # out_directory = "./data/train_images/1"
-    # images = []
-    # count = 1
+    data_directory = "./data/example_image_not"
+    out_directory = "./data/train_images/1"
+    images = []
+    count = 597
+
+    # for image in os.listdir(data_directory):
+    #     if image.lower().split(".")[-1] in ["jpg", "jpeg", "png"]:
+    #         resize_and_save(os.path.join(data_directory, image), out_directory, count)
+
+    #         count += 1
+
+    resize_and_save("data/example_images/sample3.jpg", out_directory, 1090)
     # for directory in [f for f in os.listdir(data_directory) if not f.startswith(".")]:
     #     print(directory)
-    #     for image in os.listdir(os.path.join(data_directory, directory)):
-    #         resize_and_save(
-    #             os.path.join(data_directory, directory, image), out_directory, count
-    #         )
-    #         count += 1
-    split_dataset()
+    # for image in os.listdir(os.path.join(data_directory, directory)):
+    #     resize_and_save(
+    #         os.path.join(data_directory, directory, image), out_directory, count
+    #     )
+    #     count += 1
+    # split_dataset()
