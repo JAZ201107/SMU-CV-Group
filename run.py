@@ -1,6 +1,5 @@
 import argparse
 import os
-from tqdm import tqdm
 
 from ultralytics import YOLO
 import torch
@@ -11,7 +10,6 @@ import numpy as np
 
 from model.vit import vit
 from utils.misc import load_checkpoint
-from utils.data import resize_and_convert
 import config
 
 
@@ -19,7 +17,7 @@ def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--classifier_model_weight",
-        default="experiments/base_model/last.pth.tar",
+        default="experiments/300_epochs/best.pth.tar",
         help="Load Classifier model weight",
     )
 
@@ -28,8 +26,9 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--yolo_weight", default="./yolo_weight/last_v1.pt", help="Yolo Weight"
+        "--yolo_weight", default="./yolo_weight/last_v5.pt", help="Yolo Weight"
     )
+
     parser.add_argument(
         "--output_dir",
         default="./result",
@@ -63,9 +62,21 @@ def load_images(data_dir):
 
 
 def tensor_to_str(t):
+    """
+    t:
+        x_1: left top
+        y_1: left top
+        x_2: right bottom
+        y_2: right bottom
+    """
     t = t.int()
 
-    return ", ".join(map(str, t.tolist()))
+    x = t[0]
+    y = t[1]
+    w = t[2] - t[0]
+    h = t[3] - t[1]
+
+    return f"{x}, {y}, {w}, {h}"
 
 
 def main():
@@ -98,6 +109,7 @@ def main():
         save=True,
         conf=0.15,
         iou=0.3,
+        verbose=False,
     )
 
     with open(os.path.join(args.output_dir, config.CLASSIFIER_OUTPUT), "w") as f:
@@ -109,10 +121,9 @@ def main():
             image_name = result.path.split("/")[-1]
 
             if result.boxes:
-                # yolo.save(os.path.join(args.output_dir, image_name))
                 boxes = result.boxes
                 for box in boxes:
-                    f.write(f"{image_name}, {tensor_to_str(box.xywh[0])} \n")
+                    f.write(f"{image_name}, {tensor_to_str(box.xyxy[0])} \n")
 
     print("- done. \n")
 
