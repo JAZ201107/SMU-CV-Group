@@ -98,6 +98,7 @@ def main():
         os.path.join(args.data_dir, image_name)
         for image_name in os.listdir(args.data_dir)
     ]
+    image_paths.sort()
 
     print(f"there are {len(image_paths)} to process")
     for i in trange(0, len(image_paths), 32):
@@ -112,7 +113,7 @@ def main():
         # pred = (outputs > 0.5).astype(int)
         detect_output = yolo(
             # [os.path.join(args.data_dir, image_name) for image_name in image_names],
-            image_paths[i : i + 10],
+            image_paths[i : i + 32],
             save=True,
             conf=0.15,
             iou=0.3,
