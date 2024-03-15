@@ -1,5 +1,6 @@
 import argparse
 import os
+from tqdm import trange
 
 from ultralytics import YOLO
 import torch
@@ -25,7 +26,7 @@ def get_parser():
     parser.add_argument(
         "-d",
         "--data_dir",
-        default="./evaluation/image_folder",
+        default="./evaluation/eval_folder_",
         help="Input images to predict",
     )
 
@@ -43,7 +44,7 @@ def get_parser():
     return parser
 
 
-def load_images(data_dir):
+def load_images(image_paths):
     transform = transforms.Compose(
         [
             transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
@@ -51,17 +52,14 @@ def load_images(data_dir):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         ]
     )
-    if not os.path.exists(data_dir):
-        raise FileNotFoundError
 
     image_names = []
     image_batch = []
-    for image_name in os.listdir(data_dir):
-        image_path = os.path.join(data_dir, image_name)
+    for image_path in image_paths:
         image = read_image(image_path)
 
         image_batch.append(transform(image))
-        image_names.append(image_name)
+        image_names.append([image_path.split("/")[-1]])
 
     return image_batch, image_names
 
@@ -96,41 +94,45 @@ def main():
 
     # Load images
     print("loading images ...")
-    image_batch, image_names = load_images(args.data_dir)
-    image_batch = torch.stack(image_batch)
-    print(f"there are {len(image_names)} images.")
-    print("- done\n")
+    image_paths = [
+        os.path.join(args.data_dir, image_name)
+        for image_name in os.listdir(args.data_dir)
+    ]
 
-    #
-    print("running model... ")
-    model.eval()
-    outputs = model(image_batch)
-    outputs = outputs.detach().cpu().numpy()
+    print(f"there are {len(image_paths)} to process")
+    for i in trange(0, len(image_paths), 32):
+        image_batch, image_names = load_images(image_paths[i : i + 32])
+        image_batch = torch.stack(image_batch)
 
-    outputs = np.squeeze(outputs)
-    # pred = (outputs > 0.5).astype(int)
-    detect_output = yolo(
-        [os.path.join(args.data_dir, image_name) for image_name in image_names],
-        save=True,
-        conf=0.15,
-        iou=0.3,
-        verbose=False,
-    )
+        model.eval()
+        outputs = model(image_batch)
+        outputs = outputs.detach().cpu().numpy()
 
-    with open(os.path.join(args.output_dir, config.CLASSIFIER_OUTPUT), "w") as f:
-        for img_name, output in zip(image_names, outputs):
-            f.write(f"{img_name}, {output:.2f} \n")
+        outputs = np.squeeze(outputs)
+        # pred = (outputs > 0.5).astype(int)
+        detect_output = yolo(
+            # [os.path.join(args.data_dir, image_name) for image_name in image_names],
+            image_paths[i : i + 10],
+            save=True,
+            conf=0.15,
+            iou=0.3,
+            verbose=False,
+        )
 
-    with open(os.path.join(args.output_dir, config.DETECT_OUTPUT), "w") as f:
-        for result in detect_output:
-            image_name = result.path.split("/")[-1]
+        with open(os.path.join(args.output_dir, config.CLASSIFIER_OUTPUT), "a") as f:
+            for img_name, output in zip(image_names, outputs):
+                f.write(f"{img_name[0]}, {output:.2f} \n")
 
-            if result.boxes:
-                boxes = result.boxes
-                for box in boxes:
-                    f.write(f"{image_name}, {tensor_to_str(box.xyxy[0])} \n")
+        with open(os.path.join(args.output_dir, config.DETECT_OUTPUT), "a") as f:
+            for result in detect_output:
+                image_name = result.path.split("/")[-1]
 
-    print("- done. \n")
+                if result.boxes:
+                    boxes = result.boxes
+                    for box in boxes:
+                        f.write(f"{image_name}, {tensor_to_str(box.xyxy[0])} \n")
+
+        print("- done. \n")
 
 
 if __name__ == "__main__":
