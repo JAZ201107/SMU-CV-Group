@@ -7,5 +7,8 @@ torchvision
 pyheif
 pillow-heif
 scikit-learn
+pandas 
+opencv-python
+
 
 gdown
