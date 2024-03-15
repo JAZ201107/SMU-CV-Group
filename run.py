@@ -16,22 +16,27 @@ import config
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-c",
         "--classifier_model_weight",
         default="experiments/300_epochs/best.pth.tar",
         help="Load Classifier model weight",
     )
 
     parser.add_argument(
-        "--data_dir", default="./data/example_images", help="Input images to predict"
+        "-d",
+        "--data_dir",
+        default="./evaluation/image_folder",
+        help="Input images to predict",
     )
 
     parser.add_argument(
-        "--yolo_weight", default="./yolo_weight/last_v5.pt", help="Yolo Weight"
+        "-y", "--yolo_weight", default="./yolo_weight/last_v5.pt", help="Yolo Weight"
     )
 
     parser.add_argument(
+        "-o",
         "--output_dir",
-        default="./result",
+        default="./evaluation",
         help="Optional, name of the file in --model_dir containing weights to reload before training",
     )
 
